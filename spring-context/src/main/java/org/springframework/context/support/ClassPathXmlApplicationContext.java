@@ -137,7 +137,9 @@ public class ClassPathXmlApplicationContext extends AbstractXmlApplicationContex
 	public ClassPathXmlApplicationContext(
 			String[] configLocations, boolean refresh, @Nullable ApplicationContext parent)
 			throws BeansException {
-
+		//   zhaoyuan 创建一个ClassPathXmlApplicationContext，加载beanDefinitions
+		//   * Create a new ClassPathXmlApplicationContext with the given parent,
+		//	 * loading the definitions from the given XML files.
 		super(parent);
 		setConfigLocations(configLocations);
 		if (refresh) {

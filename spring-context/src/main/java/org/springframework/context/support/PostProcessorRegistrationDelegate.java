@@ -189,6 +189,13 @@ final class PostProcessorRegistrationDelegate {
 	public static void registerBeanPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, AbstractApplicationContext applicationContext) {
 
+		//获取所有的BeanPostProcessor接口及其子接口
+		//BeanPostProcessor、
+		// DestructionAwareBeanPostProcessor、
+		// InstantiationAwareBeanPostProcessor、
+		// 	 SmartInstantiationAwareBeanPostProcessor
+		// MergedBeanDefinitionPostProcessor【放在internalPostProcessors中，往下看即知】
+		//不同接口类型的BeanPostProcessor，在Bean创建前后的执行时机是不一样的
 		String[] postProcessorNames = beanFactory.getBeanNamesForType(BeanPostProcessor.class, true, false);
 
 		// Register BeanPostProcessorChecker that logs an info message when
@@ -199,6 +206,7 @@ final class PostProcessorRegistrationDelegate {
 
 		// Separate between BeanPostProcessors that implement PriorityOrdered,
 		// Ordered, and the rest.
+		//优先级
 		List<BeanPostProcessor> priorityOrderedPostProcessors = new ArrayList<>();
 		List<BeanPostProcessor> internalPostProcessors = new ArrayList<>();
 		List<String> orderedPostProcessorNames = new ArrayList<>();
@@ -221,6 +229,8 @@ final class PostProcessorRegistrationDelegate {
 
 		// First, register the BeanPostProcessors that implement PriorityOrdered.
 		sortPostProcessors(priorityOrderedPostProcessors, beanFactory);
+		//注册BeanPostProcessor
+		//把每一个BeanPostProcessor添加到BeanFactory中
 		registerBeanPostProcessors(beanFactory, priorityOrderedPostProcessors);
 
 		// Next, register the BeanPostProcessors that implement Ordered.
@@ -252,6 +262,8 @@ final class PostProcessorRegistrationDelegate {
 
 		// Re-register post-processor for detecting inner beans as ApplicationListeners,
 		// moving it to the end of the processor chain (for picking up proxies etc).
+		//注册一个ApplicationListenerDetector来在Bean创建完成后检查是否ApplicationListener，
+		//如果是，this.applicationContext.addApplicationListener((ApplicationListener<?>) bean);
 		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(applicationContext));
 	}
 

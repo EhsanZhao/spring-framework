@@ -178,21 +178,40 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 	 */
 	@Nullable
 	protected Object getSingleton(String beanName, boolean allowEarlyReference) {
+		// zhaoyuan 三级缓存
 		// Quick check for existing instance without full singleton lock
+		// zhaoyuan 三级缓存
+		// 先从一级缓存中取，没取到但是这个对象正在创建中的话
 		Object singletonObject = this.singletonObjects.get(beanName);
 		if (singletonObject == null && isSingletonCurrentlyInCreation(beanName)) {
+			// zhaoyuan 三级缓存
+			//在二级缓存中取
 			singletonObject = this.earlySingletonObjects.get(beanName);
+			// zhaoyuan 三级缓存
+			//还没取到 并且allowEarlyReference为true的话
 			if (singletonObject == null && allowEarlyReference) {
 				synchronized (this.singletonObjects) {
 					// Consistent creation of early reference within full singleton lock
+					// zhaoyuan 三级缓存
+					// 再从一级缓存中取 但是这里是加锁的，保证单例
 					singletonObject = this.singletonObjects.get(beanName);
 					if (singletonObject == null) {
+						// zhaoyuan 三级缓存
+						//再从二级中取
 						singletonObject = this.earlySingletonObjects.get(beanName);
 						if (singletonObject == null) {
+							// zhaoyuan 三级缓存
+							// 然后最后从三级中取，取出来ObjectFactory
 							ObjectFactory<?> singletonFactory = this.singletonFactories.get(beanName);
 							if (singletonFactory != null) {
+								// zhaoyuan 三级缓存
+								// 调用getObject从工厂中获取单例对象实例
 								singletonObject = singletonFactory.getObject();
+								// zhaoyuan 三级缓存
+								// 加入二级缓存
 								this.earlySingletonObjects.put(beanName, singletonObject);
+								// zhaoyuan 三级缓存
+								// 从三级缓存中移除
 								this.singletonFactories.remove(beanName);
 							}
 						}
@@ -257,6 +276,7 @@ public class DefaultSingletonBeanRegistry extends SimpleAliasRegistry implements
 					afterSingletonCreation(beanName);
 				}
 				if (newSingleton) {
+					//将创建的单实例bean放入缓存
 					addSingleton(beanName, singletonObject);
 				}
 			}

@@ -108,6 +108,8 @@ class BeanDefinitionValueResolver {
 	public Object resolveValueIfNecessary(Object argName, @Nullable Object value) {
 		// We must check each value to see whether it requires a runtime reference
 		// to another bean to be resolved.
+		// zhaoyuan
+		// 处理运行时对象引用
 		if (value instanceof RuntimeBeanReference) {
 			RuntimeBeanReference ref = (RuntimeBeanReference) value;
 			return resolveReference(argName, ref);
@@ -201,6 +203,8 @@ class BeanDefinitionValueResolver {
 		}
 		else if (value instanceof TypedStringValue) {
 			// Convert value to target type here.
+			// zhaoyuan 填充属性
+			// 处理String类型的值
 			TypedStringValue typedStringValue = (TypedStringValue) value;
 			Object valueObject = evaluate(typedStringValue);
 			try {

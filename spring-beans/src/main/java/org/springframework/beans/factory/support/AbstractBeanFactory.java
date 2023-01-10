@@ -247,6 +247,9 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 		Object bean;
 
 		// Eagerly check singleton cache for manually registered singletons.
+		// zhaoyuan 三级缓存
+		// 从缓存中取对象  这里面就是根据参数从三级缓存中依次取对象
+		// 先获取缓存中保存的单实例bean，如果能获取到说明这个bean之前被创建过（所有创建过的单实例bean都会被缓存起来）
 		Object sharedInstance = getSingleton(beanName);
 		if (sharedInstance != null && args == null) {
 			if (logger.isTraceEnabled()) {
@@ -269,6 +272,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 			}
 
 			// Check if bean definition exists in this factory.
+			//父工厂 ， mvc需要
 			BeanFactory parentBeanFactory = getParentBeanFactory();
 			if (parentBeanFactory != null && !containsBeanDefinition(beanName)) {
 				// Not found -> check parent.
@@ -290,6 +294,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 			}
 
+			//标记bean已创建
 			if (!typeCheckOnly) {
 				markBeanAsCreated(beanName);
 			}
@@ -299,6 +304,7 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				checkMergedBeanDefinition(mbd, beanName, args);
 
 				// Guarantee initialization of beans that the current bean depends on.
+				//获取当前bean依赖的其他bean，如果有按照getBean（）把依赖的bean先创建出来
 				String[] dependsOn = mbd.getDependsOn();
 				if (dependsOn != null) {
 					for (String dep : dependsOn) {
@@ -318,9 +324,11 @@ public abstract class AbstractBeanFactory extends FactoryBeanRegistrySupport imp
 				}
 
 				// Create bean instance.
+				//启动单实例bean的创建
 				if (mbd.isSingleton()) {
 					sharedInstance = getSingleton(beanName, () -> {
 						try {
+							// zhaoyuan 创建bean对象
 							return createBean(beanName, mbd, args);
 						}
 						catch (BeansException ex) {
